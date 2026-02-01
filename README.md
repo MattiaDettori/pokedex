@@ -17,7 +17,7 @@ external calls.
 mvn spring-boot:run
 ```
 
-The service listens on `http://localhost:5000`.
+The service listens on `http://localhost:8000`.
 
 Example requests:
 
