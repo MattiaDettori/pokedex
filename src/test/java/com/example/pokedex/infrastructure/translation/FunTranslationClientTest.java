@@ -1,5 +1,6 @@
 package com.example.pokedex.infrastructure.translation;
 
+import com.example.pokedex.application.exception.ExternalServiceException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -9,10 +10,12 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
+import com.example.pokedex.application.exception.TranslationUnavailableException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class FunTranslationsClientTest {
+public class FunTranslationClientTest {
 
     private MockWebServer server;
 
@@ -55,7 +58,7 @@ class FunTranslationsClientTest {
                         {
                           "contents": {
                             "translated": "Thou art most kind."
-                          }
+                            }
                         }
                         """));
 
@@ -73,7 +76,8 @@ class FunTranslationsClientTest {
                 .addHeader("Content-Type", "application/json")
                 .setBody("""
                         {
-                          "contents": {}
+                          "contents": {
+                          }
                         }
                         """));
 
@@ -81,7 +85,7 @@ class FunTranslationsClientTest {
         FunTranslationsClient client = new FunTranslationsClient(new RestTemplate(), baseUrl);
 
         assertThatThrownBy(() -> client.translateToShakespeare("You are very kind."))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(TranslationUnavailableException.class);
     }
 
     @Test
@@ -92,7 +96,7 @@ class FunTranslationsClientTest {
         FunTranslationsClient client = new FunTranslationsClient(new RestTemplate(), baseUrl);
 
         assertThatThrownBy(() -> client.translateToYoda("You have become powerful."))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(TranslationUnavailableException.class);
     }
 
     @Test
@@ -103,6 +107,6 @@ class FunTranslationsClientTest {
         FunTranslationsClient client = new FunTranslationsClient(new RestTemplate(), baseUrl);
 
         assertThatThrownBy(() -> client.translateToYoda("You have become powerful."))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(ExternalServiceException.class);
     }
 }

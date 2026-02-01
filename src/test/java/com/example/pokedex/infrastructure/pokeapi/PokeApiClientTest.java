@@ -1,5 +1,7 @@
 package com.example.pokedex.infrastructure.pokeapi;
 
+import com.example.pokedex.application.exception.ExternalServiceException;
+import com.example.pokedex.application.exception.PokemonNotFoundException;
 import com.example.pokedex.domain.model.PokemonInfo;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -13,7 +15,7 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-class PokeApiClientTest {
+public class PokeApiClientTest {
 
     private MockWebServer server;
 
@@ -61,31 +63,6 @@ class PokeApiClientTest {
         assertThat(info.isLegendary()).isTrue();
         assertThat(info.description()).isEqualTo("It was created by a scientist after years.");
     }
-
-    @Test
-    void throwsPokemonNotFoundWhenApiReturns404() {
-        server.enqueue(new MockResponse().setResponseCode(404));
-
-        String baseUrl = server.url("/api/v2").toString();
-        PokeApiClient client = new PokeApiClient(new RestTemplate(), baseUrl);
-
-        assertThatThrownBy(() -> client.fetchPokemonInfo("missingno"))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void throwsPokemonNotFoundWhenBodyIsNull() {
-        server.enqueue(new MockResponse()
-                .addHeader("Content-Type", "application/json")
-                .setBody(""));
-
-        String baseUrl = server.url("/api/v2").toString();
-        PokeApiClient client = new PokeApiClient(new RestTemplate(), baseUrl);
-
-        assertThatThrownBy(() -> client.fetchPokemonInfo("mew"))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
 
     @Test
     void defaultsHabitatToUnknownWhenMissing() {
@@ -136,5 +113,40 @@ class PokeApiClientTest {
         PokemonInfo info = client.fetchPokemonInfo("ditto");
 
         assertThat(info.description()).isEmpty();
+    }
+
+    @Test
+    void throwsPokemonNotFoundWhenApiReturns404() {
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        String baseUrl = server.url("/api/v2").toString();
+        PokeApiClient client = new PokeApiClient(new RestTemplate(), baseUrl);
+
+        assertThatThrownBy(() -> client.fetchPokemonInfo("missingno"))
+                .isInstanceOf(PokemonNotFoundException.class);
+    }
+
+    @Test
+    void throwsPokemonNotFoundWhenBodyIsNull() {
+        server.enqueue(new MockResponse()
+                .addHeader("Content-Type", "application/json")
+                .setBody(""));
+
+        String baseUrl = server.url("/api/v2").toString();
+        PokeApiClient client = new PokeApiClient(new RestTemplate(), baseUrl);
+
+        assertThatThrownBy(() -> client.fetchPokemonInfo("mew"))
+                .isInstanceOf(PokemonNotFoundException.class);
+    }
+
+    @Test
+    void throwsExternalServiceExceptionOnServerError() {
+        server.enqueue(new MockResponse().setResponseCode(500));
+
+        String baseUrl = server.url("/api/v2").toString();
+        PokeApiClient client = new PokeApiClient(new RestTemplate(), baseUrl);
+
+        assertThatThrownBy(() -> client.fetchPokemonInfo("mew"))
+                .isInstanceOf(ExternalServiceException.class);
     }
 }

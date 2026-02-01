@@ -1,5 +1,7 @@
 package com.example.pokedex.infrastructure.pokeapi;
 
+import com.example.pokedex.application.exception.ExternalServiceException;
+import com.example.pokedex.application.exception.PokemonNotFoundException;
 import com.example.pokedex.domain.model.PokemonInfo;
 import com.example.pokedex.domain.ports.PokemonInfoProvider;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -36,7 +39,7 @@ public class PokeApiClient implements PokemonInfoProvider {
                     restTemplate.getForEntity(url, PokemonSpeciesContract.class);
             PokemonSpeciesContract body = response.getBody();
             if (body == null) {
-                throw new IllegalArgumentException("Pokemon not found:" +pokemonName);
+                throw new PokemonNotFoundException(pokemonName);
             }
             String description = extractEnglishFlavorText(body.flavorTextEntries());
             return new PokemonInfo(
@@ -46,7 +49,9 @@ public class PokeApiClient implements PokemonInfoProvider {
                     body.isLegendary()
             );
         } catch (HttpClientErrorException.NotFound ex) {
-            throw new IllegalArgumentException("Pokemon not found:" +pokemonName);
+            throw new PokemonNotFoundException(pokemonName);
+        } catch (RestClientException e) {
+            throw new ExternalServiceException("PokeApi client error:" , e);
         }
     }
 

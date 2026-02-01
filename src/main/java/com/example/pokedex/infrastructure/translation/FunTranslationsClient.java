@@ -1,5 +1,7 @@
 package com.example.pokedex.infrastructure.translation;
 
+import com.example.pokedex.application.exception.ExternalServiceException;
+import com.example.pokedex.application.exception.TranslationUnavailableException;
 import com.example.pokedex.domain.ports.TranslationProvider;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -51,11 +53,11 @@ public class FunTranslationsClient implements TranslationProvider {
                     restTemplate.postForEntity(url, request, TranslationContract.class);
             TranslationContract body = response.getBody();
             if (body == null || body.contents == null || body.contents.translated == null) {
-                throw new IllegalArgumentException("Empty translation response", null);
+                throw new TranslationUnavailableException("Empty translation response", null);
             }
             return body.contents.translated;
         } catch (RestClientException ex) {
-            throw new IllegalArgumentException("Translation API error", ex);
+            throw new ExternalServiceException("FunTranslation client error:" , ex);
         }
     }
 
