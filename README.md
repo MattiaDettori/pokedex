@@ -47,3 +47,14 @@ Override these properties via environment variables or `application.yml`:
 
 - `pokedex.pokeapi.base-url`
 - `pokedex.funtranslations.base-url`
+
+## Production notes / design decisions
+
+- External client url should be moved to a config file in production
+- External calls are cached in-memory using Spring's simple cache.
+  For production, replace with a distributed cache (Redis) and a proper eviction policy.
+- This app does not implement retries, circuit breakers, or rate limiting.
+  For production, add resiliency (e.g. Resilience4j), per-endpoint timeouts, and a fallback strategy.
+- Observability is minimal. In production, add structured logs, metrics, and tracing.
+- Project Structure reflects Domain-Driven Design approach to decouple external services from application business logic
+- Final version has been reached iterating over the requirements and following Test-Driven Development methodologies
