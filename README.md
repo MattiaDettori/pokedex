@@ -53,6 +53,7 @@ Override these properties via environment variables or `application.yml`:
 - External client url should be moved to a config file in production
 - External calls are cached in-memory using Spring's simple cache.
   For production, replace with a distributed cache (Redis) and a proper eviction policy.
+- External services only have unit tests, consider implementing a dedicates Integration Test Suite for production
 - This app does not implement retries, circuit breakers, or rate limiting.
   For production, add resiliency (e.g. Resilience4j), per-endpoint timeouts, and a fallback strategy.
 - Observability is minimal. In production, add structured logs, metrics, and tracing.
