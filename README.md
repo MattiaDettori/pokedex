@@ -58,3 +58,8 @@ Override these properties via environment variables or `application.yml`:
 - Observability is minimal. In production, add structured logs, metrics, and tracing.
 - Project Structure reflects Domain-Driven Design approach to decouple external services from application business logic
 - Final version has been reached iterating over the requirements and following Test-Driven Development methodologies
+
+
+## AI Usage
+
+For this project I was assisted by ChatGPT 5.2 Codex to implement the base structure of the Spring-Boot application, pom.xml, Dockerfile and finally the README
